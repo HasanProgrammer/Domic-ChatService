@@ -1,0 +1,8 @@
+
+use (
+	.
+	"../Domic.Common"
+	"../Domic.Domain"
+)
+
+go 1.23.0

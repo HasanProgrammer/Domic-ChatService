@@ -1,0 +1,8 @@
+use (
+	.
+	"../../Core/Domic.UseCase"
+	"../../Core/Domic.Domain"
+	"../../Core/Domic.Common"
+)
+
+go 1.23.0
