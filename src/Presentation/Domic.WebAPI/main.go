@@ -29,6 +29,8 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 
 	connectionId := r.URL.Query().Get("connectionId")
 
+	fmt.Println(connectionId, nil)
+
 	if connectionId == "" {
 		http.Error(w, "Missing [ConnectionId]!", http.StatusBadRequest)
 		return
@@ -78,11 +80,28 @@ func handleMessages() {
 
 func main() {
 
-	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/chat.css", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/css")
+		http.ServeFile(w, r, "Client/chat.css")
+	})
+
+	http.HandleFunc("/chat.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		http.ServeFile(w, r, "Client/chat.js")
+	})
+
+	http.HandleFunc("/chat-ui", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "Client/chat.html")
+	})
+
+	http.HandleFunc("/chat", handleConnections)
+
 	go handleMessages()
 
 	fmt.Println("WebSocket server started on :8080")
+
 	err := http.ListenAndServe(":8080", nil)
+
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}
