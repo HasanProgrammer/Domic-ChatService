@@ -6,47 +6,70 @@ import (
 )
 
 type UnitOfWork struct {
-	db          *gorm.DB
 	transaction *gorm.DB
 }
 
-func (u *UnitOfWork) GetTransaction() *gorm.DB {
+func (u *UnitOfWork) TransactionStart() interface{} {
 	return u.transaction
 }
 
-func (u *UnitOfWork) Commit(result chan DomainCommonDTO.Result[bool]) {
+func (u *UnitOfWork) TransactionCommit() DomainCommonDTO.Result[bool] {
 
 	if u.transaction != nil {
 
 		queryResult := u.transaction.Commit()
 
-		result <- DomainCommonDTO.Result[bool]{
-			Error:  queryResult.Error,
+		if queryResult.Error != nil {
+			return DomainCommonDTO.Result[bool]{
+				Error:  queryResult.Error,
+				Result: false,
+			}
+		}
+
+		return DomainCommonDTO.Result[bool]{
+			Error:  nil,
 			Result: true,
 		}
 
 	}
 
+	return DomainCommonDTO.Result[bool]{
+		Error:  nil,
+		Result: false,
+	}
+
 }
 
-func (u *UnitOfWork) Rollback(result chan DomainCommonDTO.Result[bool]) {
+func (u *UnitOfWork) TransactionRollback() DomainCommonDTO.Result[bool] {
 
 	if u.transaction != nil {
 
 		queryResult := u.transaction.Rollback()
 
-		result <- DomainCommonDTO.Result[bool]{
-			Error:  queryResult.Error,
+		if queryResult.Error != nil {
+			return DomainCommonDTO.Result[bool]{
+				Error:  queryResult.Error,
+				Result: false,
+			}
+		}
+
+		return DomainCommonDTO.Result[bool]{
+			Error:  nil,
 			Result: true,
 		}
 
+	}
+
+	return DomainCommonDTO.Result[bool]{
+		Error:  nil,
+		Result: false,
 	}
 
 }
 
 func NewUnitOfWork(db *gorm.DB) *UnitOfWork {
 
-	unitOfWork := &UnitOfWork{db: db}
+	unitOfWork := &UnitOfWork{}
 
 	unitOfWork.transaction = db.Begin()
 

@@ -9,7 +9,6 @@ import (
 )
 
 type CreateUserConsumerEventHandler struct {
-	unitOfWork              InfrastructureConcrete.UnitOfWork
 	globalIdentityGenerator InfrastructureConcrete.GlobalIdentityGenerator
 	serializer              InfrastructureConcrete.Serializer
 	userCommandRepository   UserContract.IUserCommandRepository
@@ -43,12 +42,11 @@ func (consumer *CreateUserConsumerEventHandler) Handle(event *DomainCommonEntity
 }
 
 func NewCreateUserConsumer(serializer InfrastructureConcrete.Serializer, userCommandRepository UserContract.IUserCommandRepository,
-	globalIdentityGenerator InfrastructureConcrete.GlobalIdentityGenerator, unitOfWork InfrastructureConcrete.UnitOfWork,
+	globalIdentityGenerator InfrastructureConcrete.GlobalIdentityGenerator,
 ) *CreateUserConsumerEventHandler {
 	return &CreateUserConsumerEventHandler{
 		globalIdentityGenerator: globalIdentityGenerator,
 		serializer:              serializer,
 		userCommandRepository:   userCommandRepository,
-		unitOfWork:              unitOfWork,
 	}
 }

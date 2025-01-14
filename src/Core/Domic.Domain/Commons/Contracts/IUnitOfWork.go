@@ -3,6 +3,7 @@ package DomainCommonContract
 import "Domic.Domain/Commons/DTOs"
 
 type IUnitOfWork interface {
-	Commit(result chan DomainCommonDTO.Result[bool])
-	Rollback(result chan DomainCommonDTO.Result[bool])
+	TransactionStart() interface{}
+	TransactionCommit() DomainCommonDTO.Result[bool]
+	TransactionRollback() DomainCommonDTO.Result[bool]
 }
