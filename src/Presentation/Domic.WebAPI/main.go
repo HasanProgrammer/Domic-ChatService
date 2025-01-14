@@ -8,11 +8,9 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-
 		//in here must be checked client url and then return false or true
 		//this result is temporally!
 		return true
-
 	},
 }
 
