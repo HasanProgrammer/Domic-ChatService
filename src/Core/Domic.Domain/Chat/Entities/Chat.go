@@ -1,4 +1,4 @@
-package ChatEntity
+package DomainChatEntity
 
 import (
 	"Domic.Domain/Commons/Contracts"
@@ -33,7 +33,7 @@ func NewChat(idGenerator DomainCommonContract.IGlobalIdentityGenerator, serializ
 	userRoles, err := serializer.Serialize(identity.GetUserRoles())
 
 	if err != nil {
-		return nil, errors.New("متن پیام ارسالی نباید بیشتر از 1000 عبارت داشته باشد!")
+		return nil, err
 	}
 
 	newChat := Chat{
