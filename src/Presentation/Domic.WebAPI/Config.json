@@ -1,4 +1,5 @@
 {
+  "Origins" : "http://localhost:3000,",
   "ConnectionStrings": {
     "PostgreSql": "host=localhost user=domic password=domic123!@# dbname=chat port=5432 sslmode=disable"
   }

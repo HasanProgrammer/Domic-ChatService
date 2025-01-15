@@ -1,4 +1,4 @@
-package DomainUserUseCaseEvents
+package UserUseCaseEvents
 
 import (
 	"Domic.Domain/Commons/Entities"

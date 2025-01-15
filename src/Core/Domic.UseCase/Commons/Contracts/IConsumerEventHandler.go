@@ -1,6 +1,6 @@
-package DomainCommonContract
+package UseCaseCommonContract
 
-import DomainCommonEntity "Domic.Domain/Commons/Entities"
+import "Domic.Domain/Commons/Entities"
 
 type IConsumerEventHandler interface {
 	Handle(event *DomainCommonEntity.Event) error
