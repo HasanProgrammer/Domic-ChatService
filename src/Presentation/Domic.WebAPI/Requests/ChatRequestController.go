@@ -20,11 +20,13 @@ type ChatDto struct {
 }
 
 type ChatRequestController struct {
+	idGenerator      DomainCommonContract.IGlobalIdentityGenerator
 	serializer       DomainCommonContract.ISerializer
 	distributedCache UseCaseCommonContract.IInternalDistributedCache
 	clients          map[string]*websocket.Conn
 }
 
+// SignInAction concurrent runing
 func (controller *ChatRequestController) SignInAction(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
@@ -76,16 +78,10 @@ func (controller *ChatRequestController) SignInAction(w http.ResponseWriter, r *
 
 }
 
+// WsConnectionsAction concurrent runing
 func (controller *ChatRequestController) WsConnectionsAction(w http.ResponseWriter, r *http.Request) {
 
-	connectionId := r.URL.Query().Get("ConnectionId")
-
-	fmt.Println(connectionId, nil)
-
-	if connectionId == "" {
-		http.Error(w, "Missing [ConnectionId]!", http.StatusBadRequest)
-		return
-	}
+	connectionId := controller.idGenerator.Generate()
 
 	var upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -108,6 +104,7 @@ func (controller *ChatRequestController) WsConnectionsAction(w http.ResponseWrit
 
 	fmt.Printf("User %s connected\n", connectionId)
 
+	//long runing goroutin
 	for {
 		var chatDto ChatDto
 		err := ws.ReadJSON(&chatDto)
@@ -124,13 +121,12 @@ func (controller *ChatRequestController) ConsumeMessagesAction() {
 	for {
 		msg := <-broadcast
 		if msg.To == "" {
-			// Broadcast به همه
+			//send message to all clients
 			for _, client := range controller.clients {
 				client.WriteJSON(msg)
 			}
 		} else {
-
-			// ارسال به گیرنده خاص
+			//send message to specific client
 			if client, ok := controller.clients[msg.To]; ok {
 				client.WriteJSON(msg)
 			}

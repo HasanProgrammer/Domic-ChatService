@@ -2,7 +2,7 @@ const chatBox = document.getElementById('chat-box');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 
-const socket = new WebSocket('ws://localhost:8080/chat?connectionId=' + generateUUID());
+const socket = new WebSocket('ws://localhost:8080/chat')
 
 socket.onopen = (event) => {
     console.log("connection with chat server is up now!");
