@@ -1,4 +1,4 @@
-package UserContract
+package DomainUserContract
 
 import (
 	"Domic.Domain/Commons/Contracts"

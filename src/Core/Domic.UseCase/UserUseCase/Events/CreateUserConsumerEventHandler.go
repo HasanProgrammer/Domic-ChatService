@@ -1,17 +1,17 @@
-package UserUseCaseEvents
+package UserUseCaseEvent
 
 import (
+	"Domic.Domain/Commons/Contracts"
 	"Domic.Domain/Commons/Entities"
 	"Domic.Domain/User/Contracts"
 	"Domic.Domain/User/Entities"
 	"Domic.Domain/User/Events"
-	"Domic.Infrastructure/Concretes"
 )
 
 type CreateUserConsumerEventHandler struct {
-	globalIdentityGenerator InfrastructureConcrete.GlobalIdentityGenerator
-	serializer              InfrastructureConcrete.Serializer
-	userCommandRepository   UserContract.IUserCommandRepository
+	globalIdentityGenerator DomainCommonContract.IGlobalIdentityGenerator
+	serializer              DomainCommonContract.ISerializer
+	userCommandRepository   DomainUserContract.IUserCommandRepository
 }
 
 func (consumer *CreateUserConsumerEventHandler) Handle(event *DomainCommonEntity.Event) error {
@@ -41,8 +41,8 @@ func (consumer *CreateUserConsumerEventHandler) Handle(event *DomainCommonEntity
 	return nil
 }
 
-func NewCreateUserConsumer(serializer InfrastructureConcrete.Serializer, userCommandRepository UserContract.IUserCommandRepository,
-	globalIdentityGenerator InfrastructureConcrete.GlobalIdentityGenerator,
+func NewCreateUserConsumer(serializer DomainCommonContract.ISerializer, userCommandRepository DomainUserContract.IUserCommandRepository,
+	globalIdentityGenerator DomainCommonContract.IGlobalIdentityGenerator,
 ) *CreateUserConsumerEventHandler {
 	return &CreateUserConsumerEventHandler{
 		globalIdentityGenerator: globalIdentityGenerator,

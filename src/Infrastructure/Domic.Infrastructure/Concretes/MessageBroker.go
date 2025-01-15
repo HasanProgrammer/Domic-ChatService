@@ -1,13 +1,15 @@
 package InfrastructureConcrete
 
 import (
+	"Domic.Domain/Commons/Contracts"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 	"sync"
 )
 
 type MessageBroker struct {
-	connection string
+	serializer DomainCommonContract.ISerializer
+	connection *amqp.Connection
 }
 
 func failOnError(err error, msg string) {
@@ -18,13 +20,9 @@ func failOnError(err error, msg string) {
 
 func (broker *MessageBroker) Subscribe(queue string, closure func(body []byte) error) {
 
-	conn, err := amqp.Dial(broker.connection)
+	defer broker.connection.Close()
 
-	failOnError(err, "Failed to connect to [RabbitMQ]")
-
-	defer conn.Close()
-
-	ch, err := conn.Channel()
+	ch, err := broker.connection.Channel()
 
 	failOnError(err, "Failed to open a channel")
 
@@ -119,10 +117,28 @@ func (broker *MessageBroker) Subscribe(queue string, closure func(body []byte) e
 
 }
 
-func (broker *MessageBroker) Publish(event interface{}) {
+func (broker *MessageBroker) Publish(event interface{}, exchange string) {
+	ch, err := broker.connection.Channel()
 
+	failOnError(err, "Failed to publish a message")
+
+	message, stringifyError := broker.serializer.Serialize(&event)
+
+	if stringifyError != nil {
+
+	}
+
+	//todo: retry policy
+	err = ch.Publish(exchange+"-e", "", false, false, amqp.Publishing{
+		ContentType: "text/plain",
+		Body:        []byte(message),
+	})
+
+	failOnError(err, "Failed to publish a message")
 }
 
 func NewMessageBroker(connection string) *MessageBroker {
-	return &MessageBroker{}
+	conn, err := amqp.Dial(connection)
+	failOnError(err, "Failed to connect to [RabbitMQ]")
+	return &MessageBroker{connection: conn}
 }

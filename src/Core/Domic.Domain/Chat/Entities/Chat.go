@@ -19,8 +19,8 @@ type Chat struct {
 	isDeleted    bool
 }
 
-func NewChat(idGenerator DomainCommonContract.IGlobalIdentityGenerator, serializer DomainCommonContract.ISerializer,
-	identity DomainCommonContract.IIdentityUser, connectionId string, content string, to string,
+func NewChat(idGenerator DomainCommonContract.IGlobalIdentityGenerator, connectionId string, content string, to string,
+	createdBy string, createdRoles string,
 ) (*Chat, error) {
 
 	if len(content) > 1000 {
@@ -29,21 +29,15 @@ func NewChat(idGenerator DomainCommonContract.IGlobalIdentityGenerator, serializ
 
 	uniqueId := idGenerator.Generate()
 	nowTime := time.Now()
-	userId := identity.GetUserIdentity()
-	userRoles, err := serializer.Serialize(identity.GetUserRoles())
-
-	if err != nil {
-		return nil, err
-	}
 
 	newChat := Chat{
 		id:           uniqueId,
-		userId:       userId,
+		userId:       createdBy,
 		connectionId: connectionId,
 		content:      content,
 		to:           to,
-		createdBy:    userId,
-		createdRole:  userRoles,
+		createdBy:    createdBy,
+		createdRole:  createdRoles,
 		createdAt:    nowTime,
 		version:      idGenerator.Generate(),
 	}

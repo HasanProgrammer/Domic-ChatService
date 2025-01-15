@@ -2,6 +2,7 @@ package WebAPIRequest
 
 import (
 	"Domic.Domain/Commons/Contracts"
+	"Domic.UseCase/ChatUseCase/DTOs"
 	"Domic.UseCase/Commons/Contracts"
 	"Domic.UseCase/UserUseCase/Commands"
 	"Domic.WebAPI/DTOs"
@@ -11,23 +12,16 @@ import (
 	"net/http"
 )
 
-var broadcast = make(chan ChatDto)
-
-type ChatDto struct {
-	ConnectionId string `json:"connectionId"`
-	Content      string `json:"content"`
-	To           string `json:"to"`
-}
-
 type ChatRequestController struct {
+	messageBroker    UseCaseCommonContract.IMessageBroker
 	idGenerator      DomainCommonContract.IGlobalIdentityGenerator
 	serializer       DomainCommonContract.ISerializer
 	distributedCache UseCaseCommonContract.IInternalDistributedCache
 	clients          map[string]*websocket.Conn
 }
 
-// SignInAction concurrent runing
-func (controller *ChatRequestController) SignInAction(w http.ResponseWriter, r *http.Request) {
+// SignInHandler concurrent runing
+func (controller *ChatRequestController) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 
@@ -78,8 +72,8 @@ func (controller *ChatRequestController) SignInAction(w http.ResponseWriter, r *
 
 }
 
-// WsConnectionsAction concurrent runing
-func (controller *ChatRequestController) WsConnectionsAction(w http.ResponseWriter, r *http.Request) {
+// WsConnectionsHandler concurrent runing
+func (controller *ChatRequestController) WsConnectionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	connectionId := controller.idGenerator.Generate()
 
@@ -104,38 +98,54 @@ func (controller *ChatRequestController) WsConnectionsAction(w http.ResponseWrit
 
 	fmt.Printf("User %s connected\n", connectionId)
 
-	//long runing goroutin
+	//long runing goroutin ( http goroutin )
 	for {
-		var chatDto ChatDto
+		var chatDto ChatUseCaseDTO.ChatDto
 		err := ws.ReadJSON(&chatDto)
 		if err != nil {
 			delete(controller.clients, connectionId)
 			break
 		}
 		chatDto.ConnectionId = connectionId
-		broadcast <- chatDto
+		//produce message into broker
+		controller.messageBroker.Publish(chatDto, "chat")
 	}
 }
 
-func (controller *ChatRequestController) ConsumeMessagesAction() {
-	for {
-		msg := <-broadcast
-		if msg.To == "" {
+func (controller *ChatRequestController) ConsumeChatMessagesHandler() {
+
+	controller.messageBroker.Subscribe("chat", func(body []byte) error {
+
+		message := ChatUseCaseDTO.ChatDto{}
+
+		controller.serializer.Deserialize(string(body), &message)
+
+		if message.To == "" {
 			//send message to all clients
 			for _, client := range controller.clients {
-				client.WriteJSON(msg)
+				client.WriteJSON(message)
 			}
 		} else {
 			//send message to specific client
-			if client, ok := controller.clients[msg.To]; ok {
-				client.WriteJSON(msg)
+			if client, ok := controller.clients[message.To]; ok {
+				client.WriteJSON(message)
 			}
 		}
-	}
+
+		return nil
+
+	})
+
 }
 
-func NewChatRequestController() *ChatRequestController {
+func NewChatRequestController(broker UseCaseCommonContract.IMessageBroker, serializer DomainCommonContract.ISerializer,
+	cache UseCaseCommonContract.IInternalDistributedCache, idGenerator DomainCommonContract.IGlobalIdentityGenerator,
+) *ChatRequestController {
 	return &ChatRequestController{
-		clients: make(map[string]*websocket.Conn),
+		messageBroker:    broker,
+		serializer:       serializer,
+		distributedCache: cache,
+		idGenerator:      idGenerator,
+		clients:          make(map[string]*websocket.Conn),
 	}
 }
