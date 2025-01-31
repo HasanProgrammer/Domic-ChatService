@@ -57,8 +57,7 @@ func (controller *ChatRequestController) SignInHandler(w http.ResponseWriter, r 
 
 				responseObject.Code = http.StatusBadRequest
 				responseObject.Message = "ورود شما به پنل پشتیبانی با موفقیت انجام نگرفت!"
-				responseObject.Body = struct {
-				}{}
+				responseObject.Body = struct{}{}
 
 				WebAPIRequestHelper.WriteJsonResponse(controller.serializer, w, responseObject)
 

@@ -75,6 +75,7 @@ func (broker *MessageBroker) Subscribe(queue string, closure func(body []byte) e
 		failOnError(err, "Failed to register a consumer")
 
 		waiter := &sync.WaitGroup{}
+
 		var counter int = 0
 
 		for {
