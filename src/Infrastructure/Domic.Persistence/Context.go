@@ -2,7 +2,7 @@ package DomicPersistence
 
 import (
 	"Domic.Persistence/Models"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +11,7 @@ type DbContext struct {
 }
 
 func NewDbContext(connection string) *DbContext {
-	db, err := gorm.Open(postgres.Open(connection), &gorm.Config{})
+	db, err := gorm.Open(sqlserver.Open(connection), &gorm.Config{})
 
 	if err != nil {
 	}

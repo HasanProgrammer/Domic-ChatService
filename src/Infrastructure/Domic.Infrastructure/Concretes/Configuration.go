@@ -3,6 +3,7 @@ package InfrastructureConcrete
 import (
 	"github.com/json-iterator/go"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -10,6 +11,7 @@ type Config struct {
 		IRabbitMQ  string `json:"I-RabbitMQ"`
 		IRedis     string `json:"I-Redis"`
 		PostgreSql string `json:"PostgreSql"`
+		SqlServer  string `json:"SqlServer"`
 	} `json:"ConnectionStrings"`
 }
 
@@ -19,21 +21,23 @@ func (configuration *Configuration) GetConnectionString(key string) (string, err
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-	file, err := os.Open("Config.json")
+	dir, err := os.Getwd()
+
+	configFilePath := filepath.Join(dir, "src", "Presentation", "Domic.WebAPI", "Config.json")
+
+	data, err := os.ReadFile(configFilePath)
 
 	if err != nil {
 
 	}
 
-	defer file.Close()
-
-	jsonDecoder := json.NewDecoder(file)
-
 	var config *Config
 
-	jsonDecoder.Decode(&config)
+	json.Unmarshal(data, &config)
 
 	switch key {
+	case "SqlServer":
+		return config.ConnectionStrings.SqlServer, nil
 	case "PostgreSql":
 		return config.ConnectionStrings.PostgreSql, nil
 	case "I-RabbitMQ":

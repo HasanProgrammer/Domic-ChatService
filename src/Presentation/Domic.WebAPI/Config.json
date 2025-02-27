@@ -1,8 +1,8 @@
 {
-  "Origins" : "http://localhost:3000,",
   "ConnectionStrings": {
     "I-RabbitMQ": "amqp://domic:Domic123@localhost:5672",
     "I-Redis": "http://localhost:6379",
+    "SqlServer": "sqlserver://sa:Domic123@localhost:1633?database=C-ChatService&encrypt=disable",
     "PostgreSql": "host=localhost user=domic password=domic123!@# dbname=chat port=5432 sslmode=disable"
   }
 }
