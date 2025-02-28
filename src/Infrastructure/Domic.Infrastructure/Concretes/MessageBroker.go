@@ -20,11 +20,12 @@ func failOnError(err error, msg string) {
 
 func (broker *MessageBroker) Subscribe(queue string, closure func(body []byte) error) {
 
-	defer broker.connection.Close()
-
 	ch, err := broker.connection.Channel()
 
-	failOnError(err, "Failed to open a channel")
+	if err != nil {
+		ch.Close()
+		failOnError(err, "Failed to open a channel")
+	}
 
 	err = ch.ExchangeDeclare(
 		queue+"-e", // name
@@ -121,7 +122,12 @@ func (broker *MessageBroker) Subscribe(queue string, closure func(body []byte) e
 func (broker *MessageBroker) Publish(event interface{}, exchange string) {
 	ch, err := broker.connection.Channel()
 
-	failOnError(err, "Failed to publish a message")
+	defer ch.Close()
+
+	if err != nil {
+		ch.Close()
+		failOnError(err, "Failed to publish a message")
+	}
 
 	message, stringifyError := broker.serializer.Serialize(&event)
 

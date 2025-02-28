@@ -22,15 +22,15 @@ func main() {
 		InfrastructureConcrete.NewGlobalIdentityGenerator(),
 	)
 
+	//async requests
+	chatRequestController.ConsumeChatMessagesHandler()
+
 	//sync requests
 	http.HandleFunc("/chat.css", WebAPIRequest.HandleStyle)
 	http.HandleFunc("/chat.js", WebAPIRequest.HandleScript)
 	http.HandleFunc("/chat-ui", WebAPIRequest.HandlePublicChatPage)
 	http.HandleFunc("/signin", chatRequestController.SignInHandler)
 	http.HandleFunc("/chat", chatRequestController.WsConnectionsHandler)
-
-	//async requests
-	chatRequestController.ConsumeChatMessagesHandler()
 
 	//start server listener
 
